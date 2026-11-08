@@ -7,7 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Acorn.Samples.Plugins;
 
 [PluginStep(PipelineStage.PreOperation, MessageNames.Update, Account.EntityLogicalName,
-    FilteringAttributes = new[] { "creditlimit" })]
+    FilteringAttributes = new[] { "creditlimit" },
+    Description = "Blocks credit limit increases above 50%.")]
 [PluginImage(ImageType.PreImage, "pre", Attributes = new[] { "creditlimit" })]
 public sealed class ValidateCreditLimitPlugin(string? unsecure, string? secure) : SamplePluginBase(unsecure, secure)
 {

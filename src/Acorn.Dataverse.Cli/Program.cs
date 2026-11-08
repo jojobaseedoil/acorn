@@ -12,6 +12,7 @@ var root = new RootCommand("Acorn: deploys Dataverse plug-in packages from [Plug
     ValidateCommand.Create(),
     WhoAmICommand.Create(),
     PlanCommand.Create(),
+    DeployCommand.Create(),
 };
 root.Options.Add(verboseOption);
 
@@ -20,6 +21,11 @@ var parseResult = root.Parse(args);
 try
 {
     return await parseResult.InvokeAsync(new InvocationConfiguration { EnableDefaultExceptionHandler = false });
+}
+catch (CliException ex)
+{
+    Console.Error.WriteLine(ex.Message);
+    return ex.ExitCode;
 }
 catch (Exception ex) when (ex is not OperationCanceledException)
 {

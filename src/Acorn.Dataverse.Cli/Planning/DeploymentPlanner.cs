@@ -71,7 +71,7 @@ internal static class DeploymentPlanner
                 "version fixed and version the assemblies instead.");
         }
 
-        return new PackageChange(ChangeKind.Update, current.UniqueName, current.Version);
+        return new PackageChange(ChangeKind.Update, current.UniqueName, current.Version, current.Id);
     }
 
     private static StepChange PlanNewStep(string typeName, PluginStepDefinition step, IReadOnlyList<PluginImageDefinition> images)
