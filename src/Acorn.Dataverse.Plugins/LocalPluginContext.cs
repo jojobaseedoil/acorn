@@ -10,6 +10,7 @@ public sealed class LocalPluginContext : ILocalPluginContext
     private readonly Lazy<IOrganizationService> _organizationService;
     private readonly Lazy<IOrganizationService> _initiatingUserService;
     private readonly Lazy<IOrganizationService> _systemService;
+    private IServiceProvider? _services;
 
     /// <summary>Creates the context from the service provider supplied by Dataverse.</summary>
     public LocalPluginContext(IServiceProvider serviceProvider)
@@ -41,6 +42,13 @@ public sealed class LocalPluginContext : ILocalPluginContext
 
     /// <inheritdoc />
     public IOrganizationService SystemService => _systemService.Value;
+
+    /// <inheritdoc />
+    public IServiceProvider Services =>
+        _services ?? throw new InvalidOperationException(
+            "Dependency injection services are available only while PluginBase is executing the plug-in.");
+
+    internal void AttachServices(IServiceProvider services) => _services = services;
 
     /// <inheritdoc />
     public void Trace(string message) => TracingService.Trace("{0}", message);
