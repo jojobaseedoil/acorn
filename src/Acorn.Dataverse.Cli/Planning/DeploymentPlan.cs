@@ -25,6 +25,8 @@ internal sealed record DeploymentPlan(
     IReadOnlyList<string> Errors)
 {
     public bool HasErrors => Errors.Count > 0;
+    public bool HasOrphans => Steps.Any(step =>
+        step.Kind == ChangeKind.Orphan || step.Images.Any(image => image.Kind == ChangeKind.Orphan));
 }
 
 internal sealed record PackageChange(ChangeKind Kind, string UniqueName, string Version);
