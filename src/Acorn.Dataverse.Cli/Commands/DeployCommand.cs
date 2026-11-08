@@ -71,7 +71,7 @@ internal static class DeployCommand
                 "Run again with --prune to delete them.");
         }
 
-        _ = await DeploymentResolver.ResolveAsync(session.Client, session.Plan, cancellationToken);
+        var references = await DeploymentResolver.ResolveAsync(session.Client, session.Plan, cancellationToken);
         Console.WriteLine("Preflight OK.");
 
         if (!yes && !Confirm())
@@ -80,8 +80,19 @@ internal static class DeployCommand
             return ExitCodes.Success;
         }
 
-        // 8.5b: DeploymentExecutor applies phases A (delete), B (package) and C (steps and images).
-        Console.WriteLine("(execution not implemented yet: nothing was changed)");
+        try
+        {
+            await new DeploymentExecutor(session.Client).ExecuteAsync(session, references, cancellationToken);
+        }
+        catch (Exception) when (!cancellationToken.IsCancellationRequested)
+        {
+            Console.Error.WriteLine(
+                "Deployment did not finish. Completed phases are kept and the failed phase was rolled back. " +
+                "Fix the cause and run deploy again: it continues from the environment's current state.");
+            throw;
+        }
+
+        Console.WriteLine("Deployment completed.");
         return ExitCodes.Success;
     }
 

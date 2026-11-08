@@ -33,6 +33,7 @@ internal static class ValidateCommand
         var plugins = MetadataPluginReader.Read(package.AssemblyPaths);
         var builtAt = File.GetLastWriteTime(packageFile.FullName);
 
+        Console.WriteLine();
         Console.WriteLine($"Package {package.Id} {package.Version} ({package.AssemblyPaths.Count} assemblies, built {builtAt:yyyy-MM-dd HH:mm:ss})");
         Console.WriteLine();
 

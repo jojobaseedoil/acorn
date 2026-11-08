@@ -29,7 +29,7 @@ internal sealed record DeploymentPlan(
         step.Kind == ChangeKind.Orphan || step.Images.Any(image => image.Kind == ChangeKind.Orphan));
 }
 
-internal sealed record PackageChange(ChangeKind Kind, string UniqueName, string Version);
+internal sealed record PackageChange(ChangeKind Kind, string UniqueName, string Version, Guid? Id = null);
 
 internal sealed record StepChange(
     ChangeKind Kind,
