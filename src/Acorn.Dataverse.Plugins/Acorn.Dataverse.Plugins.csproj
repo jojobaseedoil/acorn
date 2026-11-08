@@ -1,4 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\Acorn.Dataverse.Core\Acorn.Dataverse.Core.csproj" />
+  </ItemGroup>
   <PropertyGroup>
     <TargetFramework>net462</TargetFramework>
   </PropertyGroup>
