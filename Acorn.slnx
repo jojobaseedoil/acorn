@@ -1,4 +1,9 @@
 <Solution>
+  <Folder Name="/samples/">
+    <Project Path="samples/Acorn.Samples.Application/Acorn.Samples.Application.csproj" />
+    <Project Path="samples/Acorn.Samples.Model/Acorn.Samples.Model.csproj" />
+    <Project Path="samples/Acorn.Samples.Plugins/Acorn.Samples.Plugins.csproj" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/Acorn.Dataverse.Core/Acorn.Dataverse.Core.csproj" />
     <Project Path="src/Acorn.Dataverse.Plugins/Acorn.Dataverse.Plugins.csproj" />
