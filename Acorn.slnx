@@ -6,6 +6,7 @@
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Acorn.Dataverse.Core/Acorn.Dataverse.Core.csproj" />
+    <Project Path="src/Acorn.Dataverse.Plugins.Registration/Acorn.Dataverse.Plugins.Registration.csproj" />
     <Project Path="src/Acorn.Dataverse.Plugins/Acorn.Dataverse.Plugins.csproj" />
   </Folder>
   <Folder Name="/tests/">

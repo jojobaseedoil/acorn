@@ -1,8 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <ProjectReference Include="..\Acorn.Dataverse.Core\Acorn.Dataverse.Core.csproj" />
-  </ItemGroup>
-  <ItemGroup>
+    <ProjectReference Include="..\Acorn.Dataverse.Plugins.Registration\Acorn.Dataverse.Plugins.Registration.csproj" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
   </ItemGroup>
   <PropertyGroup>

@@ -3,13 +3,11 @@ using System.Reflection;
 namespace Acorn.Dataverse.Plugins.Registration;
 
 /// <summary>
-/// Validates <see cref="PluginStepAttribute"/> and <see cref="PluginImageAttribute"/> declarations
-/// against Dataverse registration rules. Call it from a unit test in each plug-in project.
+/// Validates plug-in step and image declarations against Dataverse registration rules.
+/// Call <see cref="EnsureValid(Assembly)"/> from a unit test in each plug-in project.
 /// </summary>
 public static class PluginStepValidator
 {
-    private const string PluginInterfaceName = "Microsoft.Xrm.Sdk.IPlugin";
-
     private static readonly HashSet<string> MessagesWithImages = new(StringComparer.OrdinalIgnoreCase)
     {
         MessageNames.Assign, MessageNames.Create, MessageNames.Delete, "DeliverIncoming", "DeliverPromote",
@@ -18,70 +16,56 @@ public static class PluginStepValidator
 
     /// <summary>Validates every concrete plug-in type in the assembly. Throws if any declaration is invalid.</summary>
     public static void EnsureValid(Assembly assembly)
-    {
-        if (assembly is null)
-        {
-            throw new ArgumentNullException(nameof(assembly));
-        }
-
-        var errors = assembly.GetTypes()
-            .Where(t => t.IsClass && !t.IsAbstract && ImplementsIPlugin(t))
-            .SelectMany(t => Validate(t))
-            .ToList();
-
-        ThrowIfAny(errors);
-    }
+        => ThrowIfAny(PluginRegistrationReader.Read(assembly).SelectMany(plugin => Validate(plugin)).ToList());
 
     /// <summary>Validates a plug-in type. Throws if any declaration is invalid.</summary>
     public static void EnsureValid(Type pluginType) => ThrowIfAny(Validate(pluginType));
 
     /// <summary>Validates a plug-in type and returns the errors found.</summary>
-    public static IReadOnlyList<string> Validate(Type pluginType)
+    public static IReadOnlyList<string> Validate(Type pluginType) => Validate(PluginRegistrationReader.Read(pluginType));
+
+    /// <summary>Validates a plug-in definition and returns the errors found.</summary>
+    public static IReadOnlyList<string> Validate(PluginTypeDefinition plugin)
     {
-        if (pluginType is null)
-        {
-            throw new ArgumentNullException(nameof(pluginType));
-        }
+        Guard.NotNull(plugin);
 
         var errors = new List<string>();
-        var steps = pluginType.GetCustomAttributes<PluginStepAttribute>(inherit: false).ToArray();
-        var images = pluginType.GetCustomAttributes<PluginImageAttribute>(inherit: false).ToArray();
 
-        if (steps.Length == 0)
+        if (plugin.Steps.Count == 0)
         {
-            if (images.Length > 0)
+            if (plugin.Images.Count > 0)
             {
-                errors.Add($"{pluginType.FullName}: [PluginImage] declared without any [PluginStep].");
+                errors.Add($"{plugin.TypeName}: [PluginImage] declared without any [PluginStep].");
             }
 
             return errors;
         }
 
-        if (!ImplementsIPlugin(pluginType))
+        if (!plugin.ImplementsPlugin)
         {
-            errors.Add($"{pluginType.FullName}: [PluginStep] can only be applied to types that implement {PluginInterfaceName}.");
+            errors.Add($"{plugin.TypeName}: [PluginStep] can only be applied to types that implement {PluginRegistrationReader.PluginInterfaceName}.");
         }
 
-        foreach (var step in steps)
+        foreach (var step in plugin.Steps)
         {
-            ValidateStep(pluginType, step, errors);
+            ValidateStep(plugin.TypeName, step, errors);
         }
 
-        ValidateDuplicateSteps(pluginType, steps, errors);
+        ValidateDuplicateSteps(plugin.TypeName, plugin.Steps, errors);
 
-        foreach (var image in images)
+        foreach (var image in plugin.Images)
         {
-            ValidateImage(pluginType, image, steps, errors);
+            ValidateImage(plugin.TypeName, image, plugin.Steps, errors);
         }
 
-        ValidateDuplicateAliases(pluginType, steps, images, errors);
+        ValidateDuplicateAliases(plugin.TypeName, plugin.Steps, plugin.Images, errors);
 
         return errors;
     }
 
-    private static void ValidateStep(Type type, PluginStepAttribute step, List<string> errors)
+    private static void ValidateStep(string typeName, PluginStepDefinition step, List<string> errors)
     {
-        var prefix = $"{type.FullName} [{Describe(step)}]";
+        var prefix = $"{typeName} [{Describe(step)}]";
 
         if (string.IsNullOrWhiteSpace(step.MessageName))
         {
@@ -107,18 +91,18 @@ public static class PluginStepValidator
             errors.Add($"{prefix}: AsyncAutoDelete applies only to asynchronous steps.");
         }
 
-        if (step.FilteringAttributes is { Length: > 0 } && !IsMessage(step, MessageNames.Update))
+        if (step.FilteringAttributes.Count > 0 && !IsMessage(step, MessageNames.Update))
         {
             errors.Add($"{prefix}: FilteringAttributes are supported only on the Update message.");
         }
 
-        if (step.FilteringAttributes?.Any(string.IsNullOrWhiteSpace) == true)
+        if (step.FilteringAttributes.Any(string.IsNullOrWhiteSpace))
         {
             errors.Add($"{prefix}: FilteringAttributes contains an empty attribute name.");
         }
     }
 
-    private static void ValidateDuplicateSteps(Type type, PluginStepAttribute[] steps, List<string> errors)
+    private static void ValidateDuplicateSteps(string typeName, IReadOnlyList<PluginStepDefinition> steps, List<string> errors)
     {
         var duplicatedSteps = steps
             .GroupBy(s => $"{(int)s.Stage}|{(int)s.Mode}|{s.MessageName}|{s.PrimaryEntityName}", StringComparer.OrdinalIgnoreCase)
@@ -126,7 +110,7 @@ public static class PluginStepValidator
 
         foreach (var group in duplicatedSteps)
         {
-            errors.Add($"{type.FullName} [{Describe(group.First())}]: step declared more than once.");
+            errors.Add($"{typeName} [{Describe(group.First())}]: step declared more than once.");
         }
 
         var duplicatedIds = steps
@@ -136,13 +120,14 @@ public static class PluginStepValidator
 
         foreach (var group in duplicatedIds)
         {
-            errors.Add($"{type.FullName}: step Id '{group.Key}' is used more than once.");
+            errors.Add($"{typeName}: step Id '{group.Key}' is used more than once.");
         }
     }
 
-    private static void ValidateImage(Type type, PluginImageAttribute image, PluginStepAttribute[] steps, List<string> errors)
+    private static void ValidateImage(
+        string typeName, PluginImageDefinition image, IReadOnlyList<PluginStepDefinition> steps, List<string> errors)
     {
-        var prefix = $"{type.FullName} [image '{image.Alias}']";
+        var prefix = $"{typeName} [image '{image.Alias}']";
 
         if (string.IsNullOrWhiteSpace(image.Alias))
         {
@@ -161,7 +146,7 @@ public static class PluginStepValidator
             return;
         }
 
-        var hint = image.StepId is null && steps.Length > 1
+        var hint = image.StepId is null && steps.Count > 1
             ? " Use StepId to bind the image to specific steps."
             : string.Empty;
         var wantsPre = image.ImageType is ImageType.PreImage or ImageType.Both;
@@ -200,7 +185,10 @@ public static class PluginStepValidator
     }
 
     private static void ValidateDuplicateAliases(
-        Type type, PluginStepAttribute[] steps, PluginImageAttribute[] images, List<string> errors)
+        string typeName,
+        IReadOnlyList<PluginStepDefinition> steps,
+        IReadOnlyList<PluginImageDefinition> images,
+        List<string> errors)
     {
         foreach (var step in steps)
         {
@@ -211,23 +199,18 @@ public static class PluginStepValidator
 
             foreach (var group in duplicatedAliases)
             {
-                errors.Add($"{type.FullName} [{Describe(step)}]: image alias '{group.Key}' is used more than once.");
+                errors.Add($"{typeName} [{Describe(step)}]: image alias '{group.Key}' is used more than once.");
             }
         }
     }
 
-    // Matches by name instead of typeof(IPlugin): keeps this namespace free of the Dataverse SDK
-    // and also works with types loaded through MetadataLoadContext.
-    private static bool ImplementsIPlugin(Type type) =>
-        type.GetInterface(PluginInterfaceName) is not null;
-
-    private static bool Targets(PluginImageAttribute image, PluginStepAttribute step) =>
+    private static bool Targets(PluginImageDefinition image, PluginStepDefinition step) =>
         image.StepId is null || string.Equals(image.StepId, step.Id, StringComparison.Ordinal);
 
-    private static bool IsMessage(PluginStepAttribute step, string messageName) =>
+    private static bool IsMessage(PluginStepDefinition step, string messageName) =>
         string.Equals(step.MessageName, messageName, StringComparison.OrdinalIgnoreCase);
 
-    private static string Describe(PluginStepAttribute step) =>
+    private static string Describe(PluginStepDefinition step) =>
         $"{step.Stage} {step.MessageName} of '{step.PrimaryEntityName ?? "any entity"}'" +
         (step.Mode == ExecutionMode.Asynchronous ? " (async)" : string.Empty);
 

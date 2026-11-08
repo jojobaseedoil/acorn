@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
-namespace Acorn.Dataverse.Core;
+namespace Acorn.Dataverse;
 
 internal static class Guard
 {
