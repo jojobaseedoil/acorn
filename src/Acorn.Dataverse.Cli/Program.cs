@@ -11,6 +11,7 @@ var root = new RootCommand("Acorn: deploys Dataverse plug-in packages from [Plug
 {
     ValidateCommand.Create(),
     WhoAmICommand.Create(),
+    PlanCommand.Create(),
 };
 root.Options.Add(verboseOption);
 
