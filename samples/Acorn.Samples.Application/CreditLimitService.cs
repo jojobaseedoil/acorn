@@ -1,13 +1,12 @@
 using Acorn.Dataverse.Core;
 using Acorn.Samples.Model;
 using Microsoft.Xrm.Sdk;
-using Microsoft.Xrm.Sdk.Query;
 
 using System.Diagnostics.CodeAnalysis;
 
 namespace Acorn.Samples.Application;
 
-public sealed class CreditLimitService(IOrganizationService service)
+public sealed class CreditLimitService(IAccountRepository accounts, INoteRepository notes)
 {
     private const decimal MaxIncreaseRatio = 1.5m;
 
@@ -30,19 +29,13 @@ public sealed class CreditLimitService(IOrganizationService service)
 
     public Guid LogChange(Guid accountId, Money? before, Money? after)
     {
-        // Read path: the server returns Entity, converted to early-bound locally.
-        var account = service
-            .Retrieve(Account.EntityLogicalName, accountId, new ColumnSet("name"))
-            .ToEntity<Account>();
+        var account = accounts.GetForCreditLog(accountId);
 
-        var note = new Annotation
+        return notes.Create(new Annotation
         {
             Subject = "Credit limit changed",
             NoteText = $"{account.Name}: {before?.Value:N2} → {after?.Value:N2}",
             ObjectId = account.ToEntityReference(),
-        };
-
-        // Write path: early-bound converted to plain Entity before reaching the server.
-        return service.Create(note.ToEntity<Entity>());
+        });
     }
 }
