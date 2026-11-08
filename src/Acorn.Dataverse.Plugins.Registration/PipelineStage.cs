@@ -1,4 +1,4 @@
-namespace Acorn.Dataverse.Plugins;
+namespace Acorn.Dataverse.Plugins.Registration;
 
 /// <summary>Stages of the Dataverse event execution pipeline.</summary>
 public enum PipelineStage

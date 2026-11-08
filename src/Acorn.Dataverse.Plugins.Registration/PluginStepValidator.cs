@@ -72,7 +72,8 @@ public static class PluginStepValidator
             errors.Add($"{prefix}: message name is required.");
         }
 
-        if (!Enum.IsDefined(typeof(PipelineStage), step.Stage))
+        if (step.Stage is not (PipelineStage.PreValidation or PipelineStage.PreOperation
+            or PipelineStage.MainOperation or PipelineStage.PostOperation))
         {
             errors.Add($"{prefix}: {(int)step.Stage} is not a valid pipeline stage.");
         }

@@ -1,4 +1,4 @@
-namespace Acorn.Dataverse.Plugins;
+namespace Acorn.Dataverse.Plugins.Registration;
 
 /// <summary>
 /// Names of common Dataverse messages. For Custom APIs, use the API unique name.
