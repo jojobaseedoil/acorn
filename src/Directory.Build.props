@@ -1,0 +1,24 @@
+<Project>
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <Authors>jojobaseedoil</Authors>
+    <Copyright>Copyright © jojobaseedoil</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/jojobaseedoil/acorn</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/jojobaseedoil/acorn</RepositoryUrl>
+    <PackageTags>dynamics365;dataverse;powerplatform;plugins;xrm</PackageTags>
+
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <PackageReference Include="PolySharp" PrivateAssets="all" />
+  </ItemGroup>
+</Project>
