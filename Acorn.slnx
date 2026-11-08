@@ -11,6 +11,8 @@
     <Project Path="src/Acorn.Dataverse.Plugins/Acorn.Dataverse.Plugins.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/Acorn.Dataverse.Cli.Tests.Fixture/Acorn.Dataverse.Cli.Tests.Fixture.csproj" />
+    <Project Path="tests/Acorn.Dataverse.Cli.Tests/Acorn.Dataverse.Cli.Tests.csproj" />
     <Project Path="tests/Acorn.Dataverse.Core.Tests/Acorn.Dataverse.Core.Tests.csproj" />
     <Project Path="tests/Acorn.Dataverse.Plugins.Tests/Acorn.Dataverse.Plugins.Tests.csproj" />
   </Folder>

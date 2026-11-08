@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Acorn.Dataverse.Cli\Acorn.Dataverse.Cli.csproj" />
+  </ItemGroup>
+
+  <!-- Where the net462 fixture is built; read by the tests at runtime. -->
+  <ItemGroup>
+    <AssemblyMetadata Include="FixtureDirectory"
+                      Value="$(MSBuildThisFileDirectory)..\Acorn.Dataverse.Cli.Tests.Fixture\bin\$(Configuration)\net462\" />
+  </ItemGroup>
+</Project>

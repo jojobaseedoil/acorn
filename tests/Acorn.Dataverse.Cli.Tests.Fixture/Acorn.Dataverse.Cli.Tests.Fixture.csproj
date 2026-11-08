@@ -1,0 +1,8 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net462</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Acorn.Dataverse.Plugins\Acorn.Dataverse.Plugins.csproj" />
+  </ItemGroup>
+</Project>

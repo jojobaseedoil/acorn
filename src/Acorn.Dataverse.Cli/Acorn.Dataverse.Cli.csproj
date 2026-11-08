@@ -17,4 +17,8 @@
     <ProjectReference Include="..\Acorn.Dataverse.Plugins.Registration\Acorn.Dataverse.Plugins.Registration.csproj" />
     <ProjectReference Include="..\Acorn.Dataverse.Core\Acorn.Dataverse.Core.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Acorn.Dataverse.Cli.Tests" />
+  </ItemGroup>
 </Project>
