@@ -155,6 +155,6 @@ public class PluginStepValidatorTests
         Assert.Equal(2, plugin.Images.Count);
 
         var update = Assert.Single(plugin.Steps, s => s.Id == "update");
-        Assert.Equal(new[] { "creditlimit" }, update.FilteringAttributes);
+        Assert.Equal("creditlimit", Assert.Single(update.FilteringAttributes));
     }
 }
