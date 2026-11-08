@@ -4,6 +4,7 @@
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <ItemGroup>
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.14" />
     <PackageVersion Include="NSubstitute" Version="6.2.0" />
     <PackageVersion Include="PolySharp" Version="1.16.0" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />

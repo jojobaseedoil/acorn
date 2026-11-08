@@ -7,7 +7,7 @@ namespace Acorn.Dataverse.Plugins;
 /// </summary>
 public interface ILocalPluginContext
 {
-    /// <summary>The raw service provider supplied by Dataverse.</summary>
+    /// <summary>The raw service provider supplied by Dataverse (not the dependency injection scope).</summary>
     IServiceProvider ServiceProvider { get; }
 
     /// <summary>The plug-in execution context.</summary>
@@ -24,6 +24,12 @@ public interface ILocalPluginContext
 
     /// <summary>Organization service running as SYSTEM.</summary>
     IOrganizationService SystemService { get; }
+
+    /// <summary>
+    /// Dependency injection scope of the current execution. Resolve application services here,
+    /// e.g. <c>context.Services.GetRequiredService&lt;AccountService&gt;()</c>.
+    /// </summary>
+    IServiceProvider Services { get; }
 
     /// <summary>Writes a message to the trace log.</summary>
     void Trace(string message);
