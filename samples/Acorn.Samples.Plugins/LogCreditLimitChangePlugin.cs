@@ -14,11 +14,10 @@ public sealed class LogCreditLimitChangePlugin(string? unsecure, string? secure)
 {
     protected override void ExecutePlugin(ILocalPluginContext context)
     {
-        var executionContext = context.ExecutionContext;
-        var before = executionContext.PreEntityImages["pre"].ToEntity<Account>();
-        var after = executionContext.PostEntityImages["post"].ToEntity<Account>();
+        var before = context.GetPreImage<Account>("pre");
+        var after = context.GetPostImage<Account>("post");
 
         context.Services.GetRequiredService<CreditLimitService>()
-            .LogChange(executionContext.PrimaryEntityId, before.CreditLimit, after.CreditLimit);
+            .LogChange(context.ExecutionContext.PrimaryEntityId, before.CreditLimit, after.CreditLimit);
     }
 }

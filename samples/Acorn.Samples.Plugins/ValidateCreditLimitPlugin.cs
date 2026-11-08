@@ -3,7 +3,6 @@ using Acorn.Dataverse.Plugins.Registration;
 using Acorn.Samples.Application;
 using Acorn.Samples.Model;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Xrm.Sdk;
 
 namespace Acorn.Samples.Plugins;
 
@@ -14,8 +13,8 @@ public sealed class ValidateCreditLimitPlugin(string? unsecure, string? secure) 
 {
     protected override void ExecutePlugin(ILocalPluginContext context)
     {
-        var target = ((Entity)context.ExecutionContext.InputParameters["Target"]).ToEntity<Account>();
-        var before = context.ExecutionContext.PreEntityImages["pre"].ToEntity<Account>();
+        var target = context.GetTarget<Account>();
+        var before = context.GetPreImage<Account>("pre");
 
         context.Services.GetRequiredService<CreditLimitService>()
             .ValidateChange(before.CreditLimit, target.CreditLimit);
