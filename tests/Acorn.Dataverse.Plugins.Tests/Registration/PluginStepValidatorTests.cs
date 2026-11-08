@@ -120,4 +120,41 @@ public class PluginStepValidatorTests
     private sealed class BoundPreImagePlugin : NoOpPlugin
     {
     }
+
+        [Fact]
+    public void Validate_WorksOnDefinitions_WithoutReflection()
+    {
+        var plugin = new PluginTypeDefinition
+        {
+            TypeName = "Contoso.Plugins.SamplePlugin",
+            ImplementsPlugin = true,
+            Steps = new[]
+            {
+                new PluginStepDefinition
+                {
+                    Stage = PipelineStage.PreOperation,
+                    MessageName = MessageNames.Update,
+                    PrimaryEntityName = "account",
+                    Mode = ExecutionMode.Asynchronous,
+                },
+            },
+        };
+
+        var errors = PluginStepValidator.Validate(plugin);
+
+        Assert.Contains(errors, error => error.Contains("asynchronous steps must be registered in PostOperation"));
+    }
+
+    [Fact]
+    public void Reader_MapsAttributesToDefinitions()
+    {
+        var plugin = PluginRegistrationReader.Read(typeof(ValidPlugin));
+
+        Assert.True(plugin.ImplementsPlugin);
+        Assert.Equal(2, plugin.Steps.Count);
+        Assert.Equal(2, plugin.Images.Count);
+
+        var update = Assert.Single(plugin.Steps, s => s.Id == "update");
+        Assert.Equal(new[] { "creditlimit" }, update.FilteringAttributes);
+    }
 }

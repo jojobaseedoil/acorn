@@ -21,4 +21,10 @@
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <PackageReference Include="PolySharp" PrivateAssets="all" />
   </ItemGroup>
+
+    <!-- Internal helpers shared (as source) by every project under src/ -->
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Shared\**\*.cs" LinkBase="Shared" />
+  </ItemGroup>
+  
 </Project>
