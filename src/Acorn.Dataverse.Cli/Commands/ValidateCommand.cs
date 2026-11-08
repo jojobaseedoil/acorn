@@ -8,11 +8,8 @@ internal static class ValidateCommand
 {
     public static Command Create()
     {
-        var packageArgument = new Argument<FileInfo>("package")
-        {
-            Description = "Path to the plug-in package (.nupkg).",
-        };
-
+        var packageArgument = DeploymentOptions.Package();
+        
         var command = new Command(
             "validate",
             "Reads the [PluginStep] and [PluginImage] declarations of a plug-in package and validates them. Does not connect to Dataverse.")

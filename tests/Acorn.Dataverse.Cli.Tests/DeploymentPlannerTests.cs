@@ -100,7 +100,12 @@ public class DeploymentPlannerTests
     public void StepForAnyEntity_MatchesDataverseNone()
     {
         var declared = UpdateStep with { PrimaryEntityName = null };
-        var current = CurrentStep() with { PrimaryEntityName = "none", Name = $"{TypeName}: Update of any Entity" };
+        var current = CurrentStep() with
+        {
+            PrimaryEntityName = "none",
+            Name = $"{TypeName}: Update of any Entity",
+            Description = $"{TypeName}: Update of any Entity",
+        };
 
         var plan = Plan(Existing(current), declared);
 
@@ -119,6 +124,18 @@ public class DeploymentPlannerTests
 
         Assert.True(plan.HasErrors);
         Assert.Contains("version", Assert.Single(plan.Errors), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void DeclaredDescription_OverridesTheDefault()
+    {
+        var declared = UpdateStep with { Description = "Blocks credit limit increases above 50%." };
+
+        var plan = Plan(Existing(CurrentStep()), declared);
+
+        var step = Assert.Single(plan.Steps);
+        Assert.Equal(ChangeKind.Update, step.Kind);
+        Assert.Contains(step.Differences, difference => difference.StartsWith("description", StringComparison.Ordinal));
     }
 
     private static DeploymentPlan Plan(EnvironmentState current, PluginStepDefinition? step = null, bool prune = false)
@@ -166,5 +183,6 @@ public class DeploymentPlannerTests
                 MessagePropertyName = "Target",
             },
         ],
+        Description = $"{TypeName}: Update of account",
     };
 }

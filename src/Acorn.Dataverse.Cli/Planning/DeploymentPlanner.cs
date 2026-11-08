@@ -52,6 +52,10 @@ internal static class DeploymentPlanner
     internal static string StepName(string typeName, PluginStepDefinition step)
         => step.Name ?? $"{typeName}: {step.MessageName} of {(IsNone(step.PrimaryEntityName) ? "any Entity" : step.PrimaryEntityName)}";
 
+    /// <summary>Step description: the declared one, or the step name, as the Plugin Registration Tool does.</summary>
+    internal static string StepDescription(string typeName, PluginStepDefinition step)
+        => step.Description ?? StepName(typeName, step);
+
     private static PackageChange PlanPackage(DesiredState desired, PackageState? current, List<string> errors)
     {
         if (current is null)
@@ -94,7 +98,7 @@ internal static class DeploymentPlanner
             step.ExecutionOrder.ToString(CultureInfo.InvariantCulture));
         Compare(differences, "filtering attributes",
             JoinAttributes(current.FilteringAttributes), JoinAttributes(step.FilteringAttributes), ignoreCase: true);
-        Compare(differences, "description", current.Description, step.Description);
+        Compare(differences, "description", current.Description, StepDescription(typeName, step));
         Compare(differences, "unsecure configuration", current.UnsecureConfiguration, step.UnsecureConfiguration);
         Compare(differences, "run as", current.RunAsUser, step.RunAsUser, ignoreCase: true);
         Compare(differences, "async auto delete", Flag(current.AsyncAutoDelete), Flag(step.AsyncAutoDelete));
