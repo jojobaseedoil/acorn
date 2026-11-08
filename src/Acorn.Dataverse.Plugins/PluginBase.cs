@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Reflection;
 using Acorn.Dataverse.Plugins.DependencyInjection;
 using Acorn.Dataverse.Plugins.Registration;
+using Acorn.Dataverse.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Xrm.Sdk;
 
@@ -69,6 +70,11 @@ public abstract class PluginBase : IPlugin
         catch (InvalidPluginExecutionException)
         {
             throw;
+        }
+        catch (DomainException ex)
+        {
+            context.Trace($"{ex.GetType().Name}{(ex.Code is null ? string.Empty : $" [{ex.Code}]")}: {ex.Message}");
+            throw new InvalidPluginExecutionException(ex.Message, ex);
         }
         catch (Exception ex)
         {
