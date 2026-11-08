@@ -1,3 +1,4 @@
+using Acorn.Dataverse.Core;
 using Acorn.Samples.Model;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
@@ -21,8 +22,9 @@ public sealed class CreditLimitService(IOrganizationService service)
 
         if (after.Value > before.Value * MaxIncreaseRatio)
         {
-            throw new InvalidPluginExecutionException(
-                $"Credit limit cannot increase more than 50% at once ({before.Value:N2} → {after.Value:N2}).");
+            throw new BusinessRuleException(
+                $"Credit limit cannot increase more than 50% at once ({before.Value:N2} → {after.Value:N2}).",
+                "CREDIT_LIMIT_INCREASE");
         }
     }
 

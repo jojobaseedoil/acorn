@@ -1,6 +1,8 @@
 using Microsoft.Xrm.Sdk;
 using NSubstitute;
 
+using Acorn.Dataverse.Core;
+
 namespace Acorn.Dataverse.Plugins.Tests;
 
 public class PluginBaseTests
@@ -48,6 +50,29 @@ public class PluginBaseTests
         plugin.Execute(_services.ServiceProvider);
 
         _services.ServiceFactory.DidNotReceiveWithAnyArgs().CreateOrganizationService(default);
+    }
+
+    [Fact]
+    public void Execute_ConvertsDomainException_KeepingMessageAsIs()
+    {
+        var plugin = new TestPlugin(_ => throw new BusinessRuleException("Credit limit too high."));
+
+        var ex = Assert.Throws<InvalidPluginExecutionException>(() => plugin.Execute(_services.ServiceProvider));
+
+        Assert.Equal("Credit limit too high.", ex.Message);
+        Assert.IsType<BusinessRuleException>(ex.InnerException);
+    }
+
+    [Fact]
+    public void Execute_TracesDomainExceptionCode()
+    {
+        var plugin = new TestPlugin(_ => throw new BusinessRuleException("Credit limit too high.", "CREDIT_LIMIT"));
+
+        Assert.Throws<InvalidPluginExecutionException>(() => plugin.Execute(_services.ServiceProvider));
+
+        _services.TracingService.Received().Trace(
+            "{0}",
+            Arg.Is<object[]>(args => ((string)args[0]).Contains("[CREDIT_LIMIT]")));
     }
 
     private sealed class TestPlugin(Action<ILocalPluginContext> action) : PluginBase
